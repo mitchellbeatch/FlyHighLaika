@@ -18,32 +18,50 @@ def resource_path(relative_path):
 async def main():
     try:
         pygame.init()
-        pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+        try:
+            pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+            mixer_ok = True
+        except:
+            mixer_ok = False
+
         WIDTH, HEIGHT = 960, 640
         screen = pygame.display.set_mode((WIDTH, HEIGHT), 0, 32, 0, 0)
         pygame.display.set_caption("Guiding Laika")
         clock = pygame.time.Clock()
+
         FONT_SIZE = 18
         font = pygame.font.Font(None, FONT_SIZE + 4)
         ui_font = pygame.font.Font(None, 32)
         big_font = pygame.font.Font(None, 52)
         CHARS = string.ascii_letters + string.digits + "@#$%^&*()"
+
         home = pygame.image.load(resource_path("assets/earth.png"))
-        home = pygame.transform.scale(home, (960, 480))
         spaceship_img = pygame.image.load(resource_path("assets/laikaship1.png"))
-        spaceship_img = pygame.transform.scale(spaceship_img, (80, 80))
+
         explosion_frames = []
         for i in range(1, 7):
             img = pygame.image.load(resource_path(f"assets/explosion{i}.png"))
-            img = pygame.transform.scale(img, (120, 120))
             explosion_frames.append(img)
-        explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.ogg"))
-        explosion_sound.set_volume(0.7)
-        music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
-        music.set_volume(0.4)
+
+        explosion_sound = None
+        music = None
+        if mixer_ok:
+            try:
+                explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.ogg"))
+                explosion_sound.set_volume(0.7)
+            except Exception as e:
+                print("explosion sound failed:", e)
+            try:
+                music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
+                music.set_volume(0.4)
+            except Exception as e:
+                print("music load failed:", e)
+
         columns = WIDTH // FONT_SIZE
+
         def create_drops():
             return [float(random.randint(-HEIGHT, 0)) for _ in range(columns)]
+
         def draw_health_bar(surface, x, y, width, height, hp, max_hp):
             pygame.draw.rect(surface, (255, 255, 255), (x, y, width, height), 2)
             ratio = max(0, hp / max_hp)
@@ -55,6 +73,7 @@ async def main():
             else:
                 color = (255, 30, 0)
             pygame.draw.rect(surface, color, (x, y + height - fill_height, width, fill_height))
+
         RAIN_SPEED = 1.8
         drops = create_drops()
         max_health = 100
@@ -71,27 +90,32 @@ async def main():
         level_timer = LEVEL_DURATION
         button_rect = pygame.Rect(0, 0, 200, 50)
         music_started = False
+
         running = True
         while running:
             dt = clock.tick(60) / 1000
             screen.fill((5, 1, 9))
             mouse_x, mouse_y = pygame.mouse.get_pos()
             ship_rect = spaceship_img.get_rect(center=(mouse_x, mouse_y))
-            if not music_started:
+
+            if not music_started and music:
                 try:
                     music.play(-1)
                     music_started = True
                 except:
                     pass
+
             if not game_over and not exploding:
                 level_timer -= dt
                 if level_timer <= 0:
                     level += 1
                     level_timer = LEVEL_DURATION
                     RAIN_SPEED += 0.8
+
             if level < 2:
                 earth_y = HEIGHT + 100 + int(drops[0])
                 screen.blit(home, (0, earth_y))
+
             for i in range(columns):
                 char = random.choice(CHARS)
                 color = (
@@ -109,14 +133,21 @@ async def main():
                 drops[i] += RAIN_SPEED
                 if drops[i] > HEIGHT:
                     drops[i] = random.randint(-100, 0)
+
             if health <= 0 and not exploding and not game_over:
-                explosion_sound.play()
+                if explosion_sound:
+                    try:
+                        explosion_sound.play()
+                    except:
+                        pass
                 exploding = True
                 explosion_index = 0
                 explosion_timer = 0
                 explosion_pos = ship_rect.center
+
             if not exploding and not game_over:
                 screen.blit(spaceship_img, ship_rect)
+
             if exploding:
                 frame = explosion_frames[explosion_index]
                 rect = frame.get_rect(center=explosion_pos)
@@ -131,11 +162,14 @@ async def main():
                         explosion_index = 0
                         if level > highScore:
                             highScore = level
+
             draw_health_bar(screen, WIDTH - 40, 50, 20, 200, health, max_health)
+
             timer_text = ui_font.render(f"Level {level} | Time: {int(level_timer)}", True, (200, 200, 200))
             screen.blit(timer_text, (WIDTH - 340, 20))
             high_score_text = ui_font.render(f"High Score: {highScore}", True, (200, 200, 200))
             screen.blit(high_score_text, (WIDTH - 340, 70))
+
             if game_over:
                 overlay = pygame.Surface((WIDTH, HEIGHT))
                 overlay.set_alpha(180)
@@ -152,10 +186,12 @@ async def main():
                 pygame.draw.rect(screen, (150, 150, 150), button_rect, 2)
                 button_text = ui_font.render("PLAY AGAIN", True, (210, 80, 120))
                 screen.blit(button_text, button_text.get_rect(center=button_rect.center))
+
             pygame.display.flip()
             pygame.mouse.set_visible(game_over)
             if game_over:
                 RAIN_SPEED = 0.5
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -170,7 +206,9 @@ async def main():
                         exploding = False
                         explosion_index = 0
                         explosion_timer = 0
+
             await asyncio.sleep(0)
+
     except Exception as e:
         import traceback
         print("CRASH:", e)
@@ -181,6 +219,7 @@ async def main():
                     pygame.quit()
                     return
             await asyncio.sleep(0)
+
     pygame.quit()
 
 asyncio.run(main())
