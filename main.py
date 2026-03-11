@@ -5,14 +5,13 @@ import string
 import sys
 import os
 
-# pygbag cwd is /data/data/appname/assets/ - files are already there without subfolder
+# pygbag cwd is /data/data/appname/assets/ — all files are flat in that dir
 _WEB = os.getcwd().endswith("/assets")
 
 def resource_path(relative_path):
     if _WEB:
-        # strip "assets/" or "sounds/" folder prefix - files are in cwd directly
-        parts = relative_path.split("/", 1)
-        return parts[1] if len(parts) > 1 else relative_path
+        # Files are flat in cwd — just use the basename
+        return os.path.basename(relative_path)
     try:
         base_path = sys._MEIPASS
     except AttributeError:
@@ -30,7 +29,6 @@ async def main():
         clock = pygame.time.Clock()
 
         FONT_SIZE = 18
-        # Use default font since monospace isn't available on web
         font = pygame.font.Font(None, FONT_SIZE + 4)
         ui_font = pygame.font.Font(None, 32)
         big_font = pygame.font.Font(None, 52)
