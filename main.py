@@ -131,117 +131,130 @@ async def main():
     global exploding, explosion_index, explosion_timer, explosion_pos
     global highScore, button_rect
 
-    running = True
-    while running:
-        dt = clock.tick(60) / 1000
-        screen.fill((5, 1, 9))
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        ship_rect = spaceship_img.get_rect(center=(mouse_x, mouse_y))
+    try:
+        running = True
+        while running:
+            dt = clock.tick(60) / 1000
+            screen.fill((5, 1, 9))
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            ship_rect = spaceship_img.get_rect(center=(mouse_x, mouse_y))
 
-        # --- Level Timer ---
-        if not game_over and not exploding:
-            level_timer -= dt
-            if level_timer <= 0:
-                level += 1
-                level_timer = LEVEL_DURATION
-                RAIN_SPEED += 0.8
-
-        # --- Earth (only level 1) ---
-        if level < 2:
-            earth_y = HEIGHT + 30 + int(drops[0])
-            screen.blit(home, (0, earth_y))
-
-        # --- Rain ---
-        for i in range(columns):
-            char = random.choice(CHARS)
-            color = (
-                max(0, min(255, 100 + random.randint(-90, 40))),
-                max(0, min(255, 255 + random.randint(-100, 0))),
-                max(0, min(255, 230 + random.randint(-100, 15)))
-            )
-            text = font.render(char, True, color)
-            x = i * FONT_SIZE
-            y = int(drops[i])
-            screen.blit(text, (x, y))
-
+            # --- Level Timer ---
             if not game_over and not exploding:
-                if ship_rect.collidepoint(x, y):
-                    health -= 0.5
+                level_timer -= dt
+                if level_timer <= 0:
+                    level += 1
+                    level_timer = LEVEL_DURATION
+                    RAIN_SPEED += 0.8
 
-            drops[i] += RAIN_SPEED
-            if drops[i] > HEIGHT:
-                drops[i] = random.randint(-100, 0)
+            # --- Earth (only level 1) ---
+            if level < 2:
+                earth_y = HEIGHT + 30 + int(drops[0])
+                screen.blit(home, (0, earth_y))
 
-        # --- Trigger Explosion ---
-        if health <= 0 and not exploding and not game_over:
-            trigger_explosion(ship_rect.center)
+            # --- Rain ---
+            for i in range(columns):
+                char = random.choice(CHARS)
+                color = (
+                    max(0, min(255, 100 + random.randint(-90, 40))),
+                    max(0, min(255, 255 + random.randint(-100, 0))),
+                    max(0, min(255, 230 + random.randint(-100, 15)))
+                )
+                text = font.render(char, True, color)
+                x = i * FONT_SIZE
+                y = int(drops[i])
+                screen.blit(text, (x, y))
 
-        # --- Draw Ship ---
-        if not exploding and not game_over:
-            screen.blit(spaceship_img, ship_rect)
+                if not game_over and not exploding:
+                    if ship_rect.collidepoint(x, y):
+                        health -= 0.5
 
-        # --- Explosion Animation ---
-        if exploding:
-            frame = explosion_frames[explosion_index]
-            rect = frame.get_rect(center=explosion_pos)
-            screen.blit(frame, rect)
+                drops[i] += RAIN_SPEED
+                if drops[i] > HEIGHT:
+                    drops[i] = random.randint(-100, 0)
 
-            explosion_timer += dt
-            if explosion_timer >= EXPLOSION_SPEED:
-                explosion_timer = 0
-                explosion_index += 1
-                if explosion_index >= len(explosion_frames):
-                    exploding = False
-                    game_over = True
-                    explosion_index = 0
-                    if level > highScore:
-                        highScore = level
+            # --- Trigger Explosion ---
+            if health <= 0 and not exploding and not game_over:
+                trigger_explosion(ship_rect.center)
 
-        # --- Health Bar ---
-        draw_health_bar(screen, WIDTH - 40, 50, 20, 200, health, max_health)
+            # --- Draw Ship ---
+            if not exploding and not game_over:
+                screen.blit(spaceship_img, ship_rect)
 
-        # --- UI ---
-        timer_text = ui_font.render(f"Level {level} | Time: {int(level_timer)}", True, (200, 200, 200))
-        screen.blit(timer_text, (WIDTH - 350, 20))
-        high_score_text = ui_font.render(f"High Score: {highScore}", True, (200, 200, 200))
-        screen.blit(high_score_text, (WIDTH - 350, 70))
+            # --- Explosion Animation ---
+            if exploding:
+                frame = explosion_frames[explosion_index]
+                rect = frame.get_rect(center=explosion_pos)
+                screen.blit(frame, rect)
 
-        # --- Game Over Screen ---
-        if game_over:
-            overlay = pygame.Surface((WIDTH, HEIGHT))
-            overlay.set_alpha(180)
-            overlay.fill((0, 0, 0))
-            screen.blit(overlay, (0, 0))
+                explosion_timer += dt
+                if explosion_timer >= EXPLOSION_SPEED:
+                    explosion_timer = 0
+                    explosion_index += 1
+                    if explosion_index >= len(explosion_frames):
+                        exploding = False
+                        game_over = True
+                        explosion_index = 0
+                        if level > highScore:
+                            highScore = level
 
-            title_text = big_font.render("FLY HIGH LAIKA", True, (230, 90, 90))
-            screen.blit(title_text, title_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60)))
+            # --- Health Bar ---
+            draw_health_bar(screen, WIDTH - 40, 50, 20, 200, health, max_health)
 
-            if level >= highScore:
-                score_text = ui_font.render(f"New High Score: {level}", True, (210, 80, 100))
-            else:
-                score_text = ui_font.render(f"Final Score: {level}", True, (210, 80, 100))
-            screen.blit(score_text, score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 10)))
+            # --- UI ---
+            timer_text = ui_font.render(f"Level {level} | Time: {int(level_timer)}", True, (200, 200, 200))
+            screen.blit(timer_text, (WIDTH - 350, 20))
+            high_score_text = ui_font.render(f"High Score: {highScore}", True, (200, 200, 200))
+            screen.blit(high_score_text, (WIDTH - 350, 70))
 
-            button_rect.center = (WIDTH // 2, HEIGHT // 2 + 60)
-            pygame.draw.rect(screen, (150, 150, 150), button_rect, 2)
-            button_text = ui_font.render("PLAY AGAIN", True, (210, 80, 120))
-            screen.blit(button_text, button_text.get_rect(center=button_rect.center))
+            # --- Game Over Screen ---
+            if game_over:
+                overlay = pygame.Surface((WIDTH, HEIGHT))
+                overlay.set_alpha(180)
+                overlay.fill((0, 0, 0))
+                screen.blit(overlay, (0, 0))
 
-        pygame.display.flip()
+                title_text = big_font.render("FLY HIGH LAIKA", True, (230, 90, 90))
+                screen.blit(title_text, title_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60)))
 
-        # --- Single unified event loop ---
-        pygame.mouse.set_visible(game_over)
-        if game_over:
-            RAIN_SPEED = 0.5
+                if level >= highScore:
+                    score_text = ui_font.render(f"New High Score: {level}", True, (210, 80, 100))
+                else:
+                    score_text = ui_font.render(f"Final Score: {level}", True, (210, 80, 100))
+                screen.blit(score_text, score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 10)))
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if game_over and button_rect.collidepoint(event.pos):
-                    reset_game()
+                button_rect.center = (WIDTH // 2, HEIGHT // 2 + 60)
+                pygame.draw.rect(screen, (150, 150, 150), button_rect, 2)
+                button_text = ui_font.render("PLAY AGAIN", True, (210, 80, 120))
+                screen.blit(button_text, button_text.get_rect(center=button_rect.center))
 
-        await asyncio.sleep(0)
+            pygame.display.flip()
+
+            # --- Single unified event loop ---
+            pygame.mouse.set_visible(game_over)
+            if game_over:
+                RAIN_SPEED = 0.5
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if game_over and button_rect.collidepoint(event.pos):
+                        reset_game()
+
+            await asyncio.sleep(0)
+
+    except Exception as e:
+        import traceback
+        print("CRASH:", e)
+        traceback.print_exc()
+        # Keep window open so error is visible in console
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+            await asyncio.sleep(0)
 
     pygame.quit()
 
