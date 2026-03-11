@@ -13,7 +13,6 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 async def main():
-    print("STARTING")
     try:
         pygame.init()
         pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
@@ -29,30 +28,23 @@ async def main():
         big_font = pygame.font.SysFont("monospace", 48, bold=True)
         CHARS = string.ascii_letters + string.digits + "@#$%^&*()"
 
-        print("Loading assets...")
         home = pygame.image.load(resource_path("assets/earth.png")).convert_alpha()
         home = pygame.transform.scale(home, (1000, 500))
-        print("earth OK")
 
         spaceship_img = pygame.image.load(resource_path("assets/laikaship1.png")).convert_alpha()
         spaceship_img = pygame.transform.scale(spaceship_img, (80, 80))
-        print("ship OK")
 
         explosion_frames = []
         for i in range(1, 7):
             img = pygame.image.load(resource_path(f"assets/explosion{i}.png")).convert_alpha()
             img = pygame.transform.scale(img, (120, 120))
             explosion_frames.append(img)
-        print("explosions OK")
 
         explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.ogg"))
         explosion_sound.set_volume(0.7)
-        print("explosion sound OK")
 
-        # Load music but don't play yet - wait until after first frame
         music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
         music.set_volume(0.4)
-        print("music loaded - ALL ASSETS LOADED")
 
         columns = WIDTH // FONT_SIZE
 
@@ -88,8 +80,6 @@ async def main():
         button_rect = pygame.Rect(0, 0, 200, 50)
         music_started = False
 
-        print("ENTERING GAME LOOP")
-
         running = True
         while running:
             dt = clock.tick(60) / 1000
@@ -97,12 +87,10 @@ async def main():
             mouse_x, mouse_y = pygame.mouse.get_pos()
             ship_rect = spaceship_img.get_rect(center=(mouse_x, mouse_y))
 
-            # Start music after first frame to avoid browser audio block
             if not music_started:
                 try:
                     music.play(-1)
                     music_started = True
-                    print("Music started")
                 except:
                     pass
 
