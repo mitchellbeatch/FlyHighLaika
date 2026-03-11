@@ -17,7 +17,7 @@ async def main():
         pygame.init()
         pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
 
-        WIDTH, HEIGHT = 1000, 700
+        WIDTH, HEIGHT = 960, 640
         screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Guiding Laika")
         clock = pygame.time.Clock()
@@ -29,7 +29,7 @@ async def main():
         CHARS = string.ascii_letters + string.digits + "@#$%^&*()"
 
         home = pygame.image.load(resource_path("assets/earth.png")).convert_alpha()
-        home = pygame.transform.scale(home, (1000, 500))
+        home = pygame.transform.scale(home, (960, 480))
 
         spaceship_img = pygame.image.load(resource_path("assets/laikaship1.png")).convert_alpha()
         spaceship_img = pygame.transform.scale(spaceship_img, (80, 80))
@@ -151,9 +151,9 @@ async def main():
             draw_health_bar(screen, WIDTH - 40, 50, 20, 200, health, max_health)
 
             timer_text = ui_font.render(f"Level {level} | Time: {int(level_timer)}", True, (200, 200, 200))
-            screen.blit(timer_text, (WIDTH - 350, 20))
+            screen.blit(timer_text, (WIDTH - 340, 20))
             high_score_text = ui_font.render(f"High Score: {highScore}", True, (200, 200, 200))
-            screen.blit(high_score_text, (WIDTH - 350, 70))
+            screen.blit(high_score_text, (WIDTH - 340, 70))
 
             if game_over:
                 overlay = pygame.Surface((WIDTH, HEIGHT))
