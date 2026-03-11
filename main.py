@@ -50,12 +50,15 @@ for i in range(1, 7):
     img = pygame.transform.scale(img, (120, 120))
     explosion_frames.append(img)
 
-explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.wav"))
+# ------------------------------
+# Sounds
+# ------------------------------
+explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.ogg"))
 explosion_sound.set_volume(0.7)
 
-pygame.mixer.music.load(resource_path("sounds/flyHighLaikaLoop.wav"))
-pygame.mixer.music.set_volume(0.4)
-pygame.mixer.music.play(-1)
+music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
+music.set_volume(0.4)
+music.play(-1)
 
 # ----------------------------
 # Game variables
@@ -114,9 +117,9 @@ def reset_game():
 def trigger_explosion(pos):
     """Start explosion: play sound and begin animation simultaneously."""
     global exploding, explosion_index, explosion_timer, explosion_pos
-    explosion_sound.play()   # <-- sound fires at the exact same moment as frame 0
+    explosion_sound.play()
     exploding = True
-    explosion_index = 0      # explicitly reset to frame 0 here, not next tick
+    explosion_index = 0
     explosion_timer = 0
     explosion_pos = pos
 
@@ -145,8 +148,7 @@ async def main():
 
         # --- Earth (only level 1) ---
         if level < 2:
-            # Earth scrolls down as rain falls; anchor it below the rain
-            earth_y = HEIGHT - home.get_height() + int(drops[0])
+            earth_y = HEIGHT + 30 + int(drops[0])
             screen.blit(home, (0, earth_y))
 
         # --- Rain ---
@@ -170,7 +172,7 @@ async def main():
             if drops[i] > HEIGHT:
                 drops[i] = random.randint(-100, 0)
 
-        # --- Trigger Explosion (sound + animation start together) ---
+        # --- Trigger Explosion ---
         if health <= 0 and not exploding and not game_over:
             trigger_explosion(ship_rect.center)
 
@@ -227,20 +229,18 @@ async def main():
 
         pygame.display.flip()
 
-        # --- Events ---
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
+        # --- Single unified event loop ---
         pygame.mouse.set_visible(game_over)
         if game_over:
             RAIN_SPEED = 0.5
 
-        for event in pygame.event.get(pygame.MOUSEBUTTONDOWN):
-            if game_over and button_rect.collidepoint(event.pos):
-                reset_game()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if game_over and button_rect.collidepoint(event.pos):
+                    reset_game()
 
-        # Required by pygbag: yield control back to the browser each frame
         await asyncio.sleep(0)
 
     pygame.quit()
