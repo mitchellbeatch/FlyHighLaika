@@ -104,7 +104,7 @@ async def main():
                     RAIN_SPEED += 0.8
 
             if level < 2:
-                earth_y = HEIGHT + 30 + int(drops[0])
+                earth_y = HEIGHT + 100 + int(drops[0])
                 screen.blit(home, (0, earth_y))
 
             for i in range(columns):
