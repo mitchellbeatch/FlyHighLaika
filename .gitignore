@@ -1,2 +1,5 @@
 *.tar.gz
 *.apk
+build/
+.DS_Store
+sounds/.DS_Store
