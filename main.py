@@ -6,6 +6,10 @@ import sys
 import os
 
 def resource_path(relative_path):
+    if sys.platform == "emscripten":
+        # pygbag runs from inside the assets/ folder already
+        # strip leading "assets/" or "sounds/" prefix is kept as-is
+        return relative_path.replace("assets/", "", 1)
     try:
         base_path = sys._MEIPASS
     except AttributeError:
@@ -28,32 +32,22 @@ async def main():
         big_font = pygame.font.SysFont("monospace", 48, bold=True)
         CHARS = string.ascii_letters + string.digits + "@#$%^&*()"
 
-        # pygbag serves files from the assets/ folder, so paths must NOT include "assets/"
-        import platform
-        on_web = sys.platform == "emscripten"
-
-        def load_path(relative_path):
-            if on_web:
-                return relative_path  # pygbag already in assets/ context
-            else:
-                return resource_path(relative_path)
-
-        home = pygame.image.load(load_path("assets/earth.png")).convert_alpha()
+        home = pygame.image.load(resource_path("assets/earth.png")).convert_alpha()
         home = pygame.transform.scale(home, (960, 480))
 
-        spaceship_img = pygame.image.load(load_path("assets/laikaship1.png")).convert_alpha()
+        spaceship_img = pygame.image.load(resource_path("assets/laikaship1.png")).convert_alpha()
         spaceship_img = pygame.transform.scale(spaceship_img, (80, 80))
 
         explosion_frames = []
         for i in range(1, 7):
-            img = pygame.image.load(load_path(f"assets/explosion{i}.png")).convert_alpha()
+            img = pygame.image.load(resource_path(f"assets/explosion{i}.png")).convert_alpha()
             img = pygame.transform.scale(img, (120, 120))
             explosion_frames.append(img)
 
-        explosion_sound = pygame.mixer.Sound(load_path("sounds/explosion1.ogg"))
+        explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.ogg"))
         explosion_sound.set_volume(0.7)
 
-        music = pygame.mixer.Sound(load_path("sounds/flyHighLaika.ogg"))
+        music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
         music.set_volume(0.4)
 
         columns = WIDTH // FONT_SIZE
