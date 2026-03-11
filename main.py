@@ -18,7 +18,7 @@ async def main():
         pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
 
         WIDTH, HEIGHT = 1000, 700
-        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED | pygame.RESIZABLE)
+        screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Guiding Laika")
         clock = pygame.time.Clock()
 
