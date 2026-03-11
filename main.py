@@ -5,10 +5,12 @@ import string
 import sys
 import os
 
+# Detect web environment by checking if we're in pygbag's virtual filesystem
+_ON_WEB = os.path.exists("/data/data")
+
 def resource_path(relative_path):
-    if sys.platform == "emscripten":
-        # pygbag runs from inside the assets/ folder already
-        # strip leading "assets/" or "sounds/" prefix is kept as-is
+    if _ON_WEB:
+        # In pygbag, cwd is /data/data/appname/assets/ - strip "assets/" prefix
         return relative_path.replace("assets/", "", 1)
     try:
         base_path = sys._MEIPASS
