@@ -29,27 +29,31 @@ async def main():
         big_font = pygame.font.SysFont("monospace", 48, bold=True)
         CHARS = string.ascii_letters + string.digits + "@#$%^&*()"
 
-        # Assets
+        print("Loading assets...")
         home = pygame.image.load(resource_path("assets/earth.png")).convert_alpha()
         home = pygame.transform.scale(home, (1000, 500))
+        print("earth OK")
+
         spaceship_img = pygame.image.load(resource_path("assets/laikaship1.png")).convert_alpha()
         spaceship_img = pygame.transform.scale(spaceship_img, (80, 80))
+        print("ship OK")
+
         explosion_frames = []
         for i in range(1, 7):
             img = pygame.image.load(resource_path(f"assets/explosion{i}.png")).convert_alpha()
             img = pygame.transform.scale(img, (120, 120))
             explosion_frames.append(img)
+        print("explosions OK")
 
-        # Sounds
         explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.ogg"))
         explosion_sound.set_volume(0.7)
+        print("explosion sound OK")
+
         music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
         music.set_volume(0.4)
         music.play(-1)
+        print("music OK - ALL ASSETS LOADED")
 
-        print("ALL ASSETS LOADED")
-
-        FONT_SIZE = 18
         columns = WIDTH // FONT_SIZE
 
         def create_drops():
@@ -67,7 +71,6 @@ async def main():
                 color = (255, 30, 0)
             pygame.draw.rect(surface, color, (x, y + height - fill_height, width, fill_height))
 
-        # Game state
         RAIN_SPEED = 1.8
         drops = create_drops()
         max_health = 100
@@ -84,7 +87,7 @@ async def main():
         level_timer = LEVEL_DURATION
         button_rect = pygame.Rect(0, 0, 200, 50)
 
-        print("ENTERING LOOP")
+        print("ENTERING GAME LOOP")
 
         running = True
         while running:
@@ -93,7 +96,6 @@ async def main():
             mouse_x, mouse_y = pygame.mouse.get_pos()
             ship_rect = spaceship_img.get_rect(center=(mouse_x, mouse_y))
 
-            # Level timer
             if not game_over and not exploding:
                 level_timer -= dt
                 if level_timer <= 0:
@@ -101,12 +103,10 @@ async def main():
                     level_timer = LEVEL_DURATION
                     RAIN_SPEED += 0.8
 
-            # Earth
             if level < 2:
                 earth_y = HEIGHT + 30 + int(drops[0])
                 screen.blit(home, (0, earth_y))
 
-            # Rain
             for i in range(columns):
                 char = random.choice(CHARS)
                 color = (
@@ -125,7 +125,6 @@ async def main():
                 if drops[i] > HEIGHT:
                     drops[i] = random.randint(-100, 0)
 
-            # Trigger explosion
             if health <= 0 and not exploding and not game_over:
                 explosion_sound.play()
                 exploding = True
@@ -133,11 +132,9 @@ async def main():
                 explosion_timer = 0
                 explosion_pos = ship_rect.center
 
-            # Draw ship
             if not exploding and not game_over:
                 screen.blit(spaceship_img, ship_rect)
 
-            # Explosion animation
             if exploding:
                 frame = explosion_frames[explosion_index]
                 rect = frame.get_rect(center=explosion_pos)
@@ -153,16 +150,13 @@ async def main():
                         if level > highScore:
                             highScore = level
 
-            # Health bar
             draw_health_bar(screen, WIDTH - 40, 50, 20, 200, health, max_health)
 
-            # UI
             timer_text = ui_font.render(f"Level {level} | Time: {int(level_timer)}", True, (200, 200, 200))
             screen.blit(timer_text, (WIDTH - 350, 20))
             high_score_text = ui_font.render(f"High Score: {highScore}", True, (200, 200, 200))
             screen.blit(high_score_text, (WIDTH - 350, 70))
 
-            # Game over screen
             if game_over:
                 overlay = pygame.Surface((WIDTH, HEIGHT))
                 overlay.set_alpha(180)
