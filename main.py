@@ -49,10 +49,10 @@ async def main():
         explosion_sound.set_volume(0.7)
         print("explosion sound OK")
 
+        # Load music but don't play yet - wait until after first frame
         music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
         music.set_volume(0.4)
-        music.play(-1)
-        print("music OK - ALL ASSETS LOADED")
+        print("music loaded - ALL ASSETS LOADED")
 
         columns = WIDTH // FONT_SIZE
 
@@ -86,6 +86,7 @@ async def main():
         level = 1
         level_timer = LEVEL_DURATION
         button_rect = pygame.Rect(0, 0, 200, 50)
+        music_started = False
 
         print("ENTERING GAME LOOP")
 
@@ -95,6 +96,15 @@ async def main():
             screen.fill((5, 1, 9))
             mouse_x, mouse_y = pygame.mouse.get_pos()
             ship_rect = spaceship_img.get_rect(center=(mouse_x, mouse_y))
+
+            # Start music after first frame to avoid browser audio block
+            if not music_started:
+                try:
+                    music.play(-1)
+                    music_started = True
+                    print("Music started")
+                except:
+                    pass
 
             if not game_over and not exploding:
                 level_timer -= dt
