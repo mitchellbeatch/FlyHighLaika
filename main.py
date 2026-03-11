@@ -34,15 +34,15 @@ async def main():
         big_font = pygame.font.Font(None, 52)
         CHARS = string.ascii_letters + string.digits + "@#$%^&*()"
 
-        home = pygame.image.load(resource_path("assets/earth.png")).convert_alpha()
+        home = pygame.image.load(resource_path("assets/earth.png")).convert()
         home = pygame.transform.scale(home, (960, 480))
 
-        spaceship_img = pygame.image.load(resource_path("assets/laikaship1.png")).convert_alpha()
+        spaceship_img = pygame.image.load(resource_path("assets/laikaship1.png")).convert()
         spaceship_img = pygame.transform.scale(spaceship_img, (80, 80))
 
         explosion_frames = []
         for i in range(1, 7):
-            img = pygame.image.load(resource_path(f"assets/explosion{i}.png")).convert_alpha()
+            img = pygame.image.load(resource_path(f"assets/explosion{i}.png")).convert()
             img = pygame.transform.scale(img, (120, 120))
             explosion_frames.append(img)
 
