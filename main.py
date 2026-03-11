@@ -5,13 +5,13 @@ import string
 import sys
 import os
 
-# pygbag cwd is /data/data/appname/assets/ — all files are flat in that dir
-_WEB = os.getcwd().endswith("/assets")
-
 def resource_path(relative_path):
-    if _WEB:
-        # Files are flat in cwd — just use the basename
-        return os.path.basename(relative_path)
+    # In pygbag, all files are flat in the assets/ cwd
+    # Just use the filename directly - works for both "assets/foo.png" and "sounds/foo.ogg"
+    filename = os.path.basename(relative_path)
+    if os.path.exists(filename):
+        return filename
+    # Local development - use full path
     try:
         base_path = sys._MEIPASS
     except AttributeError:
