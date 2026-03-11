@@ -5,13 +5,14 @@ import string
 import sys
 import os
 
-# Detect web environment by checking if we're in pygbag's virtual filesystem
-_ON_WEB = os.path.exists("/data/data")
+# pygbag cwd is /data/data/appname/assets/ - files are already there without subfolder
+_WEB = os.getcwd().endswith("/assets")
 
 def resource_path(relative_path):
-    if _ON_WEB:
-        # In pygbag, cwd is /data/data/appname/assets/ - strip "assets/" prefix
-        return relative_path.replace("assets/", "", 1)
+    if _WEB:
+        # strip "assets/" or "sounds/" folder prefix - files are in cwd directly
+        parts = relative_path.split("/", 1)
+        return parts[1] if len(parts) > 1 else relative_path
     try:
         base_path = sys._MEIPASS
     except AttributeError:
@@ -29,9 +30,10 @@ async def main():
         clock = pygame.time.Clock()
 
         FONT_SIZE = 18
-        font = pygame.font.SysFont("monospace", FONT_SIZE, bold=True)
-        ui_font = pygame.font.SysFont("monospace", 28, bold=True)
-        big_font = pygame.font.SysFont("monospace", 48, bold=True)
+        # Use default font since monospace isn't available on web
+        font = pygame.font.Font(None, FONT_SIZE + 4)
+        ui_font = pygame.font.Font(None, 32)
+        big_font = pygame.font.Font(None, 52)
         CHARS = string.ascii_letters + string.digits + "@#$%^&*()"
 
         home = pygame.image.load(resource_path("assets/earth.png")).convert_alpha()
