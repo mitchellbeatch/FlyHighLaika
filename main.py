@@ -50,16 +50,6 @@ for i in range(1, 7):
     img = pygame.transform.scale(img, (120, 120))
     explosion_frames.append(img)
 
-# ------------------------------
-# Sounds
-# ------------------------------
-explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.ogg"))
-explosion_sound.set_volume(0.7)
-
-music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
-music.set_volume(0.4)
-music.play(-1)
-
 # ----------------------------
 # Game variables
 # ----------------------------
@@ -132,6 +122,16 @@ async def main():
     global highScore, button_rect
 
     try:
+        # ------------------------------
+        # Sounds
+        # ------------------------------
+        explosion_sound = pygame.mixer.Sound(resource_path("sounds/explosion1.ogg"))
+        explosion_sound.set_volume(0.7)
+
+        music = pygame.mixer.Sound(resource_path("sounds/flyHighLaika.ogg"))
+        music.set_volume(0.4)
+        music.play(-1)
+
         running = True
         while running:
             dt = clock.tick(60) / 1000
